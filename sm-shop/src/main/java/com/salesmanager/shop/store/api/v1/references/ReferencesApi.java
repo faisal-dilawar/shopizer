@@ -2,17 +2,24 @@ package com.salesmanager.shop.store.api.v1.references;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.currency.Currency;
 import com.salesmanager.core.model.reference.language.Language;
@@ -92,6 +99,20 @@ public class ReferencesApi {
   @GetMapping("/currency")
   public List<Currency> getCurrency() {
     return currencyFacade.getList();
+  }
+
+  /**
+   * Update the currency symbol override for a given currency code.
+   * Requires admin authentication (/private/).
+   * Send {"symbolOverride": "₹"} to set an override, or {"symbolOverride": ""} to clear it.
+   */
+  @PutMapping("/private/currency/{code}")
+  @ResponseStatus(HttpStatus.OK)
+  public void updateCurrencySymbol(
+      @PathVariable String code,
+      @RequestBody Map<String, String> payload) throws ServiceException {
+    String symbolOverride = payload.get("symbolOverride");
+    currencyFacade.updateSymbolOverride(code, symbolOverride);
   }
 
   @GetMapping("/measures")

@@ -56,6 +56,7 @@ public class ReadableOrderPopulator extends
 		target.setDatePurchased(source.getDatePurchased());
 		target.setOrderStatus(source.getStatus());
 		target.setCurrency(source.getCurrency().getCode());
+		target.setCurrencySymbol(source.getCurrency().getSymbol());
 		//target.setCurrencyModel(source.getCurrency());
 		
 		target.setPaymentType(source.getPaymentType());

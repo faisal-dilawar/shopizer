@@ -308,14 +308,27 @@ public class ProductPriceUtils {
 
 		NumberFormat currencyInstance = null;
 
+		// Determine the Java-default symbol so we can replace it if an override is set.
+		// National format uses a locale-specific symbol; international uses the invariant one.
+		String javaSymbol;
 		if (store.isCurrencyFormatNational()) {
 			currencyInstance = NumberFormat.getCurrencyInstance(locale);// national
+			javaSymbol = currency.getSymbol(locale);
 		} else {
 			currencyInstance = NumberFormat.getCurrencyInstance();// international
+			javaSymbol = currency.getSymbol();
 		}
 		currencyInstance.setCurrency(currency);
 
-		return currencyInstance.format(amount.doubleValue());
+		String formatted = currencyInstance.format(amount.doubleValue());
+
+		// If an override symbol is configured, replace whatever Java embedded.
+		String override = store.getCurrency().getSymbolOverride();
+		if (override != null && !override.isBlank()) {
+			formatted = formatted.replace(javaSymbol, override);
+		}
+
+		return formatted;
 
 	}
 
@@ -329,7 +342,16 @@ public class ProductPriceUtils {
 		Currency curr = currency.getCurrency();
 		NumberFormat currencyInstance = NumberFormat.getCurrencyInstance(locale);
 		currencyInstance.setCurrency(curr);
-		return currencyInstance.format(amount.doubleValue());
+		String formatted = currencyInstance.format(amount.doubleValue());
+
+		// If an override symbol is configured, replace whatever Java embedded.
+		String override = currency.getSymbolOverride();
+		if (override != null && !override.isBlank()) {
+			String javaSymbol = curr.getSymbol(locale);
+			formatted = formatted.replace(javaSymbol, override);
+		}
+
+		return formatted;
 
 	}
 

@@ -1,5 +1,6 @@
 package com.salesmanager.shop.store.controller.currency.facade;
 
+import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.services.reference.currency.CurrencyService;
 import com.salesmanager.core.model.reference.currency.Currency;
 import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
@@ -31,5 +32,15 @@ public class CurrencyFacadeImpl implements CurrencyFacade {
     	  }
     	});
     return currencyList;
+  }
+
+  @Override
+  public void updateSymbolOverride(String code, String symbolOverride) throws ServiceException {
+    Currency currency = currencyService.getByCode(code);
+    if (currency == null) {
+      throw new ResourceNotFoundException("Currency not found for code: " + code);
+    }
+    currency.setSymbolOverride(symbolOverride);
+    currencyService.update(currency);
   }
 }

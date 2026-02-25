@@ -28,6 +28,7 @@ public class OrderEntity extends Order implements Serializable {
 	private CreditCard creditCard;
 	private Date datePurchased;
 	private String currency;
+	private String currencySymbol;
 	private boolean customerAgreed;
 	private boolean confirmedAddress;
 	private String comments;
@@ -86,6 +87,12 @@ public class OrderEntity extends Order implements Serializable {
 	}
 	public void setCurrency(String currency) {
 		this.currency = currency;
+	}
+	public String getCurrencySymbol() {
+		return currencySymbol;
+	}
+	public void setCurrencySymbol(String currencySymbol) {
+		this.currencySymbol = currencySymbol;
 	}
 	public boolean isCustomerAgreed() {
 		return customerAgreed;

@@ -2,9 +2,7 @@ package com.salesmanager.test.utils;
 
 
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -27,7 +25,6 @@ import com.salesmanager.test.configuration.ConfigurationTest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {ConfigurationTest.class})
-@Ignore
 public class UtilsTestCase  {
 	
 	
@@ -67,19 +64,25 @@ public class UtilsTestCase  {
 		
 	}
 	
-	//@Test
-	@Ignore
-	public void testCurrency() throws Exception {
-		
-		Currency currency = currencyService.getByCode("BGN");
-		
-		java.util.Currency c = currency.getCurrency();
-		
-		NumberFormat numberFormat = NumberFormat.getCurrencyInstance(Locale.US);
-		numberFormat.setCurrency(c);
-		
-		System.out.println("Done");
-		
+	@Test
+	public void testCurrency_javaDefaultSymbolUsedWhenNoOverride() throws Exception {
+		Currency currency = currencyService.getByCode("INR");
+		Assert.assertNotNull("INR currency must exist in the database", currency);
+		// No override is set in the seeded data, so Java's default "Rs." must be returned
+		Assert.assertEquals("Rs.", currency.getSymbol());
+	}
+
+	@Test
+	public void testCurrency_overrideSymbolTakesPrecedence() throws Exception {
+		Currency currency = currencyService.getByCode("INR");
+		Assert.assertNotNull(currency);
+
+		currency.setSymbolOverride("₹");
+		Assert.assertEquals("₹", currency.getSymbol());
+
+		// Clearing the override must fall back to Java default
+		currency.setSymbolOverride(null);
+		Assert.assertEquals("Rs.", currency.getSymbol());
 	}
 	
 	@Test
