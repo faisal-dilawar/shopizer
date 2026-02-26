@@ -2,13 +2,9 @@ name: Backend CI
 
 on:
   push:
-    branches: [ main, master ]
-    paths:
-      - 'shopizer/**'
+    branches: [ main, master, ai_session ]
   pull_request:
-    branches: [ main, master ]
-    paths:
-      - 'shopizer/**'
+    branches: [ main, master, ai_session ]
 
 jobs:
   build:
@@ -25,15 +21,13 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        working-directory: shopizer
         run: mvn clean install -DskipTests
 
       - name: Run Tests
-        working-directory: shopizer
         run: mvn test
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: shopizer-backend
-          path: shopizer/sm-shop/target/shopizer.jar
+          path: sm-shop/target/shopizer.jar
