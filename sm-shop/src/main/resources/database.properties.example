@@ -1,0 +1,13 @@
+# Local Development Database Configuration
+# Default: H2 Embedded Database
+db.driverClass=org.h2.Driver
+db.jdbcUrl=jdbc:h2:mem:SALESMANAGER;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+db.user=sa
+db.password=
+db.show.sql=true
+db.preferredTestQuery=SELECT 1
+db.schema=SALESMANAGER
+db.minPoolSize=5
+db.maxPoolSize=10
+hibernate.dialect=org.hibernate.dialect.H2Dialect
+hibernate.hbm2ddl.auto=update

@@ -117,38 +117,12 @@ setup_maven() {
 check_db_properties() {
   section "database.properties"
   if [[ ! -f "$DB_PROPS" ]]; then
-    echo ""
-    echo "╔══════════════════════════════════════════════════╗"
-    echo "║  ✗ MISSING: database.properties                  ║"
-    echo "╚══════════════════════════════════════════════════╝"
-    echo ""
-    echo "  Expected at: $DB_PROPS"
-    echo ""
-    echo "  This file is excluded from git (see .gitignore)."
-    echo "  Create it manually using the template below, then re-run this script."
-    echo ""
-    echo "  ── Copy-paste to create the file ─────────────────────────────"
-    echo ""
-    echo "  cat > $DB_PROPS << 'DBEOF'"
-    echo "  db.jdbcUrl=jdbc:mysql://127.0.0.1:3306/SALESMANAGER?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8"
-    echo "  db.user=root"
-    echo "  db.password=YOUR_MYSQL_ROOT_PASSWORD"
-    echo "  db.driverClass=com.mysql.cj.jdbc.Driver"
-    echo "  hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect"
-    echo "  db.preferredTestQuery=SELECT 1"
-    echo "  db.show.sql=false"
-    echo "  db.schema=SALESMANAGER"
-    echo "  hibernate.hbm2ddl.auto=update"
-    echo "  db.initialPoolSize=4"
-    echo "  db.minPoolSize=4"
-    echo "  db.maxPoolSize=4"
-    echo "  DBEOF"
-    echo ""
-    echo "  ───────────────────────────────────────────────────────────────"
-    echo ""
-    exit 1
+    echo "║  ℹ AUTO-SETUP: Creating database.properties from example... ║"
+    cp "$SCRIPT_DIR/sm-shop/src/main/resources/database.properties.example" "$DB_PROPS"
+    log "✓ database.properties created"
+  else
+    log "✓ database.properties exists"
   fi
-  log "✓ database.properties exists"
 }
 
 # ── MySQL ─────────────────────────────────────────────────────────────────────
