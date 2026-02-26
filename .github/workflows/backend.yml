@@ -1,0 +1,39 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'shopizer/**'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'shopizer/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        working-directory: shopizer
+        run: mvn clean install -DskipTests
+
+      - name: Run Tests
+        working-directory: shopizer
+        run: mvn test
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: shopizer-backend
+          path: shopizer/sm-shop/target/shopizer.jar
