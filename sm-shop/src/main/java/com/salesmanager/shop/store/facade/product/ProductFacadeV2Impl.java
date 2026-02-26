@@ -2,12 +2,15 @@ package com.salesmanager.shop.store.facade.product;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +28,9 @@ import com.salesmanager.core.business.services.catalog.product.relationship.Prod
 import com.salesmanager.core.business.services.catalog.product.variant.ProductVariantService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.ProductCriteria;
+import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
+import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
+import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationshipType;
 import com.salesmanager.core.model.catalog.product.variant.ProductVariant;
@@ -32,9 +38,12 @@ import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.mapper.catalog.product.ReadableProductMapper;
 import com.salesmanager.shop.mapper.catalog.product.ReadableProductVariantMapper;
+import com.salesmanager.shop.model.catalog.product.ProductPriceRequest;
 import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.model.catalog.product.ReadableProductList;
+import com.salesmanager.shop.model.catalog.product.ReadableProductPrice;
 import com.salesmanager.shop.model.catalog.product.product.variant.ReadableProductVariant;
+import com.salesmanager.shop.populator.catalog.ReadableFinalPricePopulator;
 import com.salesmanager.shop.populator.catalog.ReadableProductPopulator;
 import com.salesmanager.shop.store.api.exception.ResourceNotFoundException;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
@@ -107,6 +116,11 @@ public class ProductFacadeV2Impl implements ProductFacade {
 		
 
 		ReadableProduct readableProduct = readableProductMapper.convert(product, store, language);
+
+		//get all instances for this product group by option
+		List<ProductVariant> instances = productVariantService.getByProductId(store, product, language);
+		List<ReadableProductVariant> readableInstances = instances.stream().map(p -> this.productVariant(p, store, language)).collect(Collectors.toList());
+		readableProduct.setVariants(readableInstances);
 
 		return readableProduct;
 		
@@ -230,60 +244,57 @@ public class ProductFacadeV2Impl implements ProductFacade {
 	}
 
 
-	/**
-	@Override
-	public ReadableProductPrice getProductPrice(Long id, ProductPriceRequest priceRequest, MerchantStore store,
-			Language language) {
-
-		
-		Validate.notNull(id, "Product id cannot be null");
-		Validate.notNull(priceRequest, "Product price request cannot be null");
-		Validate.notNull(store, "MerchantStore cannot be null");
-		Validate.notNull(language, "Language cannot be null");
-		
-		try {
-			Product model = productService.findOne(id, store);
+		@Override
+		public ReadableProductPrice getProductPrice(Long id, ProductPriceRequest priceRequest, MerchantStore store,
+				Language language) {
+	
 			
-			List<ProductAttribute> attributes = null;
+			Validate.notNull(id, "Product id cannot be null");
+			Validate.notNull(priceRequest, "Product price request cannot be null");
+			Validate.notNull(store, "MerchantStore cannot be null");
+			Validate.notNull(language, "Language cannot be null");
 			
-			if(!CollectionUtils.isEmpty(priceRequest.getOptions())) {
-				List<Long> attrinutesIds = priceRequest.getOptions().stream().map(p -> p.getId()).collect(Collectors.toList());
+			try {
+				Product model = productService.findOne(id, store);
 				
-				attributes = productAttributeService.getByAttributeIds(store, model, attrinutesIds);      
+				List<ProductAttribute> attributes = null;
 				
-				for(ProductAttribute attribute : attributes) {
-					if(attribute.getProduct().getId().longValue()!= id.longValue()) {
-						//throw unauthorized
-						throw new OperationNotAllowedException("Attribute with id [" + attribute.getId() + "] is not attached to product id [" + id + "]");
+				if(!CollectionUtils.isEmpty(priceRequest.getOptions())) {
+					List<Long> attrinutesIds = priceRequest.getOptions().stream().map(p -> p.getId()).collect(Collectors.toList());
+					
+					attributes = productAttributeService.getByAttributeIds(store, model, attrinutesIds);      
+					
+					for(ProductAttribute attribute : attributes) {
+						if(attribute.getProduct().getId().longValue()!= id.longValue()) {
+							//throw unauthorized
+							throw new ServiceRuntimeException("Attribute with id [" + attribute.getId() + "] is not attached to product id [" + id + "]");
+						}
 					}
 				}
-			}
-			
-			if(!StringUtils.isBlank(priceRequest.getSku())) {
-				 //change default availability with sku (instance availability)
-				List<ProductAvailability> availabilityList = productAvailabilityService.getBySku(priceRequest.getSku(), store);
-				if(CollectionUtils.isNotEmpty(availabilityList)) {
-					model.setAvailabilities(new HashSet<ProductAvailability>(availabilityList));
+				
+				if(!StringUtils.isBlank(priceRequest.getSku())) {
+					 //change default availability with sku (instance availability)
+					List<ProductAvailability> availabilityList = productAvailabilityService.getBySku(priceRequest.getSku(), store);
+					if(CollectionUtils.isNotEmpty(availabilityList)) {
+						model.setAvailabilities(new HashSet<ProductAvailability>(availabilityList));
+					}
 				}
+				
+				FinalPrice price;
+			
+				//attributes can be null;
+				price = pricingService.calculateProductPrice(model, attributes);
+		    	ReadableProductPrice readablePrice = new ReadableProductPrice();
+		    	ReadableFinalPricePopulator populator = new ReadableFinalPricePopulator();
+		    	populator.setPricingService(pricingService);
+		    	
+		    	
+		    	return populator.populate(price, readablePrice, store, language);
+	    	
+			} catch (Exception e) {
+				throw new ServiceRuntimeException("An error occured while getting product price",e);
 			}
 			
-			FinalPrice price;
-		
-			//attributes can be null;
-			price = pricingService.calculateProductPrice(model, attributes);
-	    	ReadableProductPrice readablePrice = new ReadableProductPrice();
-	    	ReadableFinalPricePopulator populator = new ReadableFinalPricePopulator();
-	    	populator.setPricingService(pricingService);
-	    	
-	    	
-	    	return populator.populate(price, readablePrice, store, language);
-    	
-		} catch (Exception e) {
-			throw new ServiceRuntimeException("An error occured while getting product price",e);
+	
 		}
-		
-
 	}
-	**/
-
-}

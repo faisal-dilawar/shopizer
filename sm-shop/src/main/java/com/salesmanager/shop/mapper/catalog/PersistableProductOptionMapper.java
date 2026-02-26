@@ -56,6 +56,11 @@ public class PersistableProductOptionMapper implements Mapper<PersistableProduct
 
       if(!CollectionUtils.isEmpty(source.getDescriptions())) {
         for(com.salesmanager.shop.model.catalog.product.attribute.ProductOptionDescription desc : source.getDescriptions()) {
+          
+          if (StringUtils.isBlank(desc.getName()) && StringUtils.isBlank(desc.getDescription())) {
+            continue;
+          }
+
           ProductOptionDescription description = null;
           if(!CollectionUtils.isEmpty(destination.getDescriptions())) {
             for(ProductOptionDescription d : destination.getDescriptions()) {

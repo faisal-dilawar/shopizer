@@ -266,7 +266,7 @@ public class ProductVariationApi {
 	
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = { "/private/product/variations" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/private/product/variation", "/private/product/variations" }, method = RequestMethod.GET)
 	@ApiImplicitParams({ 
 		@ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
 			@ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en") })

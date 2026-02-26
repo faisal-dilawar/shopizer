@@ -56,6 +56,12 @@ public class ReadableProductVariationMapper implements Mapper<ProductVariation, 
 		ProductOptionDescription desc = this.optionDescription(option.getDescriptions(), lang);
 		if(desc != null) {
 			opt.setName(desc.getName());
+		} else {
+			//fallback
+			option.getDescriptions().stream().findFirst().ifPresent(d -> opt.setName(d.getName()));
+			if(org.apache.commons.lang3.StringUtils.isBlank(opt.getName())) {
+				opt.setName(option.getCode());
+			}
 		}
 
 		return opt;
@@ -69,6 +75,12 @@ public class ReadableProductVariationMapper implements Mapper<ProductVariation, 
 			ProductOptionValueDescription desc = optionValueDescription(val.getDescriptions(), language);
 			if(desc!=null) {
 				value.setName(desc.getName());
+			} else {
+				//fallback
+				val.getDescriptions().stream().findFirst().ifPresent(d -> value.setName(d.getName()));
+				if(org.apache.commons.lang3.StringUtils.isBlank(value.getName())) {
+					value.setName(val.getCode());
+				}
 			}
 			return value;
 

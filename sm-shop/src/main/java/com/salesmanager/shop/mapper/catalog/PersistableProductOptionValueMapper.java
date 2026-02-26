@@ -57,11 +57,15 @@ public class PersistableProductOptionValueMapper
 				}
 			}
 
-			if (!CollectionUtils.isEmpty(source.getDescriptions())) {
-				for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription desc : source
-						.getDescriptions()) {
-					ProductOptionValueDescription description = null;
-					if (!CollectionUtils.isEmpty(destination.getDescriptions())) {
+			                        if (!CollectionUtils.isEmpty(source.getDescriptions())) {
+			                                for (com.salesmanager.shop.model.catalog.product.attribute.ProductOptionValueDescription desc : source
+			                                                .getDescriptions()) {
+			                                        
+			                                        if (StringUtils.isBlank(desc.getName()) && StringUtils.isBlank(desc.getDescription())) {
+			                                            continue;
+			                                        }
+			
+			                                        ProductOptionValueDescription description = null;					if (!CollectionUtils.isEmpty(destination.getDescriptions())) {
 						for (ProductOptionValueDescription d : destination.getDescriptions()) {
 							if (!StringUtils.isBlank(desc.getLanguage())
 									&& desc.getLanguage().equals(d.getLanguage().getCode())) {

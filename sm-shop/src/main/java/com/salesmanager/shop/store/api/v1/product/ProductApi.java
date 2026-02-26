@@ -41,6 +41,8 @@ import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.model.catalog.product.LightPersistableProduct;
 import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.model.catalog.product.ReadableProductList;
+import com.salesmanager.shop.model.catalog.product.ProductPriceRequest;
+import com.salesmanager.shop.model.catalog.product.ReadableProductPrice;
 import com.salesmanager.shop.model.catalog.product.product.PersistableProduct;
 import com.salesmanager.shop.model.entity.Entity;
 import com.salesmanager.shop.model.entity.EntityExists;
@@ -331,7 +333,6 @@ public class ProductApi {
 	 * @param language
 	 * @return
 	 */
-	/**
 	@RequestMapping(value = "/product/{id}/price", method = RequestMethod.POST)
 	@ApiOperation(httpMethod = "POST", value = "Calculate product price with variants", notes = "Product price calculation from variants")
 	@ApiResponses(value = {
@@ -346,7 +347,6 @@ public class ProductApi {
 		return productFacade.getProductPrice(id, variants, merchantStore, language);
 
 	}
-	**/
 
 	/**
 	 * API for getting a product

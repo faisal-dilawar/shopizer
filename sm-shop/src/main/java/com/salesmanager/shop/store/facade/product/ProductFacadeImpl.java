@@ -23,13 +23,18 @@ import com.salesmanager.core.business.services.catalog.product.attribute.Product
 import com.salesmanager.core.business.services.catalog.product.relationship.ProductRelationshipService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.catalog.product.ProductCriteria;
+import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
+import com.salesmanager.core.model.catalog.product.price.FinalPrice;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationship;
 import com.salesmanager.core.model.catalog.product.relationship.ProductRelationshipType;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.model.catalog.product.ReadableProductList;
+import com.salesmanager.shop.model.catalog.product.ProductPriceRequest;
+import com.salesmanager.shop.model.catalog.product.ReadableProductPrice;
 import com.salesmanager.shop.model.catalog.product.product.PersistableProduct;
+import com.salesmanager.shop.populator.catalog.ReadableFinalPricePopulator;
 import com.salesmanager.shop.populator.catalog.ReadableProductPopulator;
 import com.salesmanager.shop.store.api.exception.ConversionRuntimeException;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
@@ -223,7 +228,6 @@ public class ProductFacadeImpl implements ProductFacade {
 		return readableProduct;
 	}
 
-	/**
 	@Override
 	public ReadableProductPrice getProductPrice(Long id, ProductPriceRequest priceRequest, MerchantStore store, Language language) {
 		Validate.notNull(id, "Product id cannot be null");
@@ -242,7 +246,8 @@ public class ProductFacadeImpl implements ProductFacade {
 			for(ProductAttribute attribute : attributes) {
 				if(attribute.getProduct().getId().longValue()!= id.longValue()) {
 					//throw unauthorized
-					throw new OperationNotAllowedException("Attribute with id [" + attribute.getId() + "] is not attached to product id [" + id + "]");
+					//throw new OperationNotAllowedException("Attribute with id [" + attribute.getId() + "] is not attached to product id [" + id + "]");
+					throw new ServiceRuntimeException("Attribute with id [" + attribute.getId() + "] is not attached to product id [" + id + "]");
 				}
 			}
 			
@@ -261,7 +266,6 @@ public class ProductFacadeImpl implements ProductFacade {
 		}
 
 	}
-	**/
 
 	@Override
 	public Product getProduct(Long id, MerchantStore store) {
