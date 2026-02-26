@@ -9,30 +9,16 @@ import javax.inject.Inject;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.salesmanager.core.business.services.reference.country.CountryService;
-import com.salesmanager.core.business.services.reference.currency.CurrencyService;
 import com.salesmanager.core.business.utils.CacheUtils;
 import com.salesmanager.core.model.common.Address;
 import com.salesmanager.core.model.reference.currency.Currency;
 import com.salesmanager.core.modules.utils.Encryption;
 import com.salesmanager.core.modules.utils.GeoLocation;
-import com.salesmanager.test.configuration.ConfigurationTest;
+import com.salesmanager.test.common.AbstractSalesManagerCoreTestCase;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {ConfigurationTest.class})
-public class UtilsTestCase  {
-	
-	
-	@Inject
-	private CountryService countryService;
-	
-	@Inject
-	private CurrencyService currencyService;
+public class UtilsTestCase extends AbstractSalesManagerCoreTestCase {
 	
 	@Inject
 	private Encryption encryption;
@@ -68,8 +54,9 @@ public class UtilsTestCase  {
 	public void testCurrency_javaDefaultSymbolUsedWhenNoOverride() throws Exception {
 		Currency currency = currencyService.getByCode("INR");
 		Assert.assertNotNull("INR currency must exist in the database", currency);
-		// No override is set in the seeded data, so Java's default "Rs." must be returned
-		Assert.assertEquals("Rs.", currency.getSymbol());
+		// Use the actual JVM default symbol for the test comparison
+		String expectedDefault = java.util.Currency.getInstance("INR").getSymbol();
+		Assert.assertEquals(expectedDefault, currency.getSymbol());
 	}
 
 	@Test
@@ -82,7 +69,8 @@ public class UtilsTestCase  {
 
 		// Clearing the override must fall back to Java default
 		currency.setSymbolOverride(null);
-		Assert.assertEquals("Rs.", currency.getSymbol());
+		String expectedDefault = java.util.Currency.getInstance("INR").getSymbol();
+		Assert.assertEquals(expectedDefault, currency.getSymbol());
 	}
 	
 	@Test
